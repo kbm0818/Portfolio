@@ -1,0 +1,249 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Cameras\Camera.cpp" />
+    <ClCompile Include="Cameras\CameraFactory.cpp" />
+    <ClCompile Include="Cameras\FirstPerson.cpp" />
+    <ClCompile Include="Cameras\TopView.cpp" />
+    <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="Environment\Sky.cpp" />
+    <ClCompile Include="FbxModel\MoAnimation.cpp" />
+    <ClCompile Include="FbxModel\MoAnimationController.cpp" />
+    <ClCompile Include="FbxModel\MoAnimationKeyFrames.cpp" />
+    <ClCompile Include="FbxModel\MoBoneWeights.cpp" />
+    <ClCompile Include="FbxModel\MoLoader.cpp" />
+    <ClCompile Include="FbxModel\MoMaterial.cpp" />
+    <ClCompile Include="FbxModel\MoModel.cpp" />
+    <ClCompile Include="FbxModel\MoModelMesh.cpp" />
+    <ClCompile Include="FbxModel\MoPart.cpp" />
+    <ClCompile Include="FbxModel\MoSkeleton.cpp" />
+    <ClCompile Include="FbxModel\MoSkeletonBone.cpp" />
+    <ClCompile Include="Meshes\Plane.cpp" />
+    <ClCompile Include="Model\Model.cpp" />
+    <ClCompile Include="Model\ModelAnimation.cpp" />
+    <ClCompile Include="Model\ModelAnimationController.cpp" />
+    <ClCompile Include="Model\ModelAnimationKeyFrames.cpp" />
+    <ClCompile Include="Model\ModelBoneWeights.cpp" />
+    <ClCompile Include="Model\ModelMaterial.cpp" />
+    <ClCompile Include="Model\ModelMesh.cpp" />
+    <ClCompile Include="Model\ModelPart.cpp" />
+    <ClCompile Include="Model\ModelSkeleton.cpp" />
+    <ClCompile Include="Model\ModelSkeletonBone.cpp" />
+    <ClCompile Include="Program.cpp" />
+    <ClCompile Include="Renders\BackBuffer.cpp" />
+    <ClCompile Include="Renders\RenderTarget.cpp" />
+    <ClCompile Include="Renders\States.cpp" />
+    <ClCompile Include="Renders\VertexLayouts.cpp" />
+    <ClCompile Include="Shaders\Shader.cpp" />
+    <ClCompile Include="Systems\D3D.cpp" />
+    <ClCompile Include="Systems\Keyboard.cpp" />
+    <ClCompile Include="Systems\Mouse.cpp" />
+    <ClCompile Include="Systems\Time.cpp" />
+    <ClCompile Include="Systems\Window.cpp" />
+    <ClCompile Include="Utilities\BinaryFile.cpp" />
+    <ClCompile Include="Utilities\Mesh.cpp" />
+    <ClCompile Include="Utilities\String.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cameras\Camera.h" />
+    <ClInclude Include="Cameras\CameraBuffer.h" />
+    <ClInclude Include="Cameras\CameraFactory.h" />
+    <ClInclude Include="Cameras\FirstPerson.h" />
+    <ClInclude Include="Cameras\TopView.h" />
+    <ClInclude Include="Editor.h" />
+    <ClInclude Include="Environment\Sky.h" />
+    <ClInclude Include="Environment\SkyBuffer.h" />
+    <ClInclude Include="FbxModel\MoAnimation.h" />
+    <ClInclude Include="FbxModel\MoAnimationController.h" />
+    <ClInclude Include="FbxModel\MoAnimationKeyFrames.h" />
+    <ClInclude Include="FbxModel\MoBoneWeights.h" />
+    <ClInclude Include="FbxModel\MoLoader.h" />
+    <ClInclude Include="FbxModel\MoMaterial.h" />
+    <ClInclude Include="FbxModel\MoModel.h" />
+    <ClInclude Include="FbxModel\MoModelMesh.h" />
+    <ClInclude Include="FbxModel\MoModelUtility.h" />
+    <ClInclude Include="FbxModel\MoPart.h" />
+    <ClInclude Include="FbxModel\MoSkeleton.h" />
+    <ClInclude Include="FbxModel\MoSkeletonBone.h" />
+    <ClInclude Include="Meshes\Plane.h" />
+    <ClInclude Include="Model\AnimBuffer.h" />
+    <ClInclude Include="Model\Model.h" />
+    <ClInclude Include="Model\ModelAnimation.h" />
+    <ClInclude Include="Model\ModelAnimationController.h" />
+    <ClInclude Include="Model\ModelAnimationKeyFrames.h" />
+    <ClInclude Include="Model\ModelBoneWeights.h" />
+    <ClInclude Include="Model\ModelBuffer.h" />
+    <ClInclude Include="Model\ModelMaterial.h" />
+    <ClInclude Include="Model\ModelMesh.h" />
+    <ClInclude Include="Model\ModelPart.h" />
+    <ClInclude Include="Model\ModelSkeleton.h" />
+    <ClInclude Include="Model\ModelSkeletonBone.h" />
+    <ClInclude Include="Program.h" />
+    <ClInclude Include="Renders\BackBuffer.h" />
+    <ClInclude Include="Renders\RenderTarget.h" />
+    <ClInclude Include="Renders\States.h" />
+    <ClInclude Include="Renders\VertexLayouts.h" />
+    <ClInclude Include="Shaders\Shader.h" />
+    <ClInclude Include="Shaders\ShaderBuffer.h" />
+    <ClInclude Include="Shaders\SunBuffer.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Systems\D3D.h" />
+    <ClInclude Include="Systems\Keyboard.h" />
+    <ClInclude Include="Systems\Mouse.h" />
+    <ClInclude Include="Systems\Time.h" />
+    <ClInclude Include="Systems\Window.h" />
+    <ClInclude Include="Utilities\BinaryFile.h" />
+    <ClInclude Include="Utilities\Mesh.h" />
+    <ClInclude Include="Utilities\String.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FB087E1C-AE10-46B1-94AB-84859382E85B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Direct3D</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\DX9\Include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\DX9\Lib\x86</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DIRECT3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../_Libraries</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>../../_Libraries</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;DIRECT3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DIRECT3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;DIRECT3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
