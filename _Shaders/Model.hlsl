@@ -8,20 +8,9 @@ cbuffer VS_Bone: register(b3)
 	float3 _bonePadding;
 }
 
-cbuffer PS_Material : register(b1)
-{
-	float4 _ambient;
-	float4 _diffuse;
-	float4 _specular;
-	float4 _emissive;
-	float4 _normal;
-	float _shininess;
-	float3 _materialPadding;
-}
-
 struct VertexInput
 {
-	float4 position : POSITION0;
+	float3 position : POSITION0;
 	float2 uv : TEXCOORD0;
 	float3 normal : NORMAL0;
 	float3 tangent : TANGENT0;
@@ -38,67 +27,143 @@ struct PixelInput
 	float3 tangent : TANGENT0;
 	float3 binormal : BINORMAL0;
 	float3 viewDirection : TEXCOORD1;
+	float4 lightViewPosition : TEXCOORD2;
+	float3 lightPos : TEXCOORD3;
 };
 
 PixelInput VS(VertexInput input)
 {
 	PixelInput output;
-	
+	float4x4 world = 0;
+
 	if (_skinning == 0)
 	{
-		output.position = mul(input.position, _world);
-
-		output.normal = mul(input.normal, (float3x3) _world);
-		output.tangent = normalize(mul(input.tangent, (float3x3) _world));
-		output.binormal = normalize(mul(input.binormal, (float3x3) _world));
+		world = _world;
 	}
 	else
 	{
-		float4x4 skinTransform = 0;
-		skinTransform += _boneArray[input.boneIndices.x] * input.boneWeights.x;
-		skinTransform += _boneArray[input.boneIndices.y] * input.boneWeights.y;
-		skinTransform += _boneArray[input.boneIndices.z] * input.boneWeights.z;
-		skinTransform += _boneArray[input.boneIndices.w] * input.boneWeights.w;
+		world += _boneArray[input.boneIndices.x] * input.boneWeights.x;
+		world += _boneArray[input.boneIndices.y] * input.boneWeights.y;
+		world += _boneArray[input.boneIndices.z] * input.boneWeights.z;
+		world += _boneArray[input.boneIndices.w] * input.boneWeights.w;
 
-		float4x4 world = mul(skinTransform, _world);
-		output.position = mul(input.position, world);
-	
-		output.normal = normalize(mul(input.normal, (float3x3) world));
-		output.tangent = normalize(mul(input.tangent, (float3x3) world));
-		output.binormal = normalize(mul(input.binormal, (float3x3) world));
+		world = mul(world, _world);
 	}
 	
-	output.viewDirection = _cameraPosition - output.position.xyz;
+	float4 pos = mul(float4(input.position, 1.0f), world);
 
-	output.position = mul(output.position, _view);
+	output.position = mul(pos, _view);
 	output.position = mul(output.position, _projection);
+
+	output.lightViewPosition = mul(pos, _lightView);
+	output.lightViewPosition = mul(output.lightViewPosition, _lightProjection);
+
+	output.viewDirection = normalize(_cameraPosition - pos.xyz);
+	output.lightPos = normalize(_lightPosition - pos.xyz);
+
+	output.normal = normalize(mul(input.normal, (float3x3) world));
+	output.tangent = normalize(mul(input.tangent, (float3x3) world));
+	output.binormal = normalize(mul(input.binormal, (float3x3) world));
 
 	output.uv = input.uv;
 
 	return output;
 }
 
-Texture2D _map[5] : register(t0);
-SamplerState _samp;
+cbuffer PS_Material : register(b1)
+{
+	float4 _ambient;
+	float4 _diffuse;
+	float4 _specular;
+	float4 _emissive;
+	float4 _normal;
+	float _shininess;
+	float3 _materialPadding;
+}
+
+
+Texture2D _depthMap : register(t0);
+Texture2D _map[5] : register(t1);
 //0: ambient, 1: diffuse, 2:specular, 3.emissive, 4.normal
+
+SamplerState _sampWrap : register(s0);
+SamplerState _sampClamp : register(s1);
 
 float4 PS(PixelInput input) : SV_TARGET
 {
-	float3 T = normalize(input.tangent);
-	float3 B = normalize(input.binormal);
-	float3 N = normalize(input.normal);
+	float4 color = _ambientColor;
+	float3 lightDir = -_direction;
 
-	float3x3 TBN = float3x3(T, B, N);
-
-	float3 V = normalize(input.viewDirection);
-	
-	float4 diffuseColor = _map[1].Sample(_samp, input.uv);
-	float3 normal = _map[4].Sample(_samp, input.uv).rgb;
+	// 노멀계산 ////////////////////////////////////////////////////////
+	float3x3 TBN = float3x3(normalize(input.tangent), 
+		normalize(input.binormal), 
+		normalize(input.normal)
+		);
+	float3 normal = _map[4].Sample(_sampWrap, input.uv).rgb;
 	normal = 2 * normal - 1;
 	normal = mul(normal, TBN);
-	float4 specular = _map[2].Sample(_samp, input.uv);
+	//////////////////////////////////////////////////////////////////////////
 
-	//return _diffuse;
-	//return NormalColor(_ambient, diffuseColor, _light, normal);
-	return SpecularNormalColor(_ambient, diffuseColor, specular, length(_specular), normal, V, _direction);
+	// 그림자 계산 && 음영 계산 ////////////////////////////////////////////////////
+	float2 projectTexCoord;
+	float bias = 0.0001f;
+	float depthValue;
+	float lightDepthValue;
+	float lightIntensity;
+	float4 specular = float4(_map[2].Sample(_sampWrap, input.uv).rgb, 1.0f);
+	float3 V = normalize(input.viewDirection);
+
+	projectTexCoord.x = input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
+	projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+
+	if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
+	{
+		depthValue = _depthMap.Sample(_sampClamp, projectTexCoord).r;
+		lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
+
+		lightDepthValue = lightDepthValue - bias;
+
+		if (lightDepthValue < depthValue)
+		{
+			lightIntensity = saturate(dot(normal, lightDir));
+
+			if (lightIntensity > 0.0f)
+			{
+				float3 reflection = normalize(2 * lightIntensity * normal - lightDir);
+				
+				float4 specularIntensity = pow(saturate(dot(reflection, V)), _shininess);
+
+				color += (_diffuseColor * lightIntensity) + (specularIntensity * specular);
+				color = saturate(color);
+			}
+		}
+	}
+	else
+	{
+		lightIntensity = saturate(dot(normal, lightDir));
+
+		if (lightIntensity > 0.0f)
+		{
+			float3 reflection = normalize(2 * lightIntensity * normal - lightDir);
+			float4 specularIntensity = pow(saturate(dot(reflection, V)), _shininess);
+
+			color += (_diffuseColor * lightIntensity) + (specularIntensity * specular);
+			color = saturate(color);
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////
+
+
+	/*lightIntensity = saturate(dot(normal, lightDir));
+	if (lightIntensity > 0.0f)
+	{
+		color += (_diffuseColor * lightIntensity);
+		color = saturate(color);
+	}*/
+
+	float4 textureColor = _map[1].Sample(_sampWrap, input.uv);
+
+	color = color * textureColor;
+
+	return color;
 }

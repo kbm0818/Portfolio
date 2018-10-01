@@ -8,7 +8,7 @@ public:
 	~GameObjectFactory();
 
 	GameObject* Create(string objectName, GlobalValues* values);
-	GameObject* CreateModel(wstring modelName, GlobalValues* values);
+	GameObject* CreateModel(wstring modelName, GlobalValues* values, bool isUser = false);
 
 
 private:

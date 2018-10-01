@@ -18,6 +18,10 @@ struct PixelInput
 	float3 tangent : TANGENT0;
 	float3 binormal : BINORMAL0;
 	float4 depthPosition : TEXCOORD1;
+	float4 lightViewPosition : TEXCOORD2;
+	float zFogFactor : FOG1;
+	float yFogFactor : FOG2;
+	float4 fogColor : FOG3;
 };
 
 PixelInput VS(VertexInput input)
@@ -36,27 +40,38 @@ PixelInput VS(VertexInput input)
 
 	output.depthPosition = output.position;
 
+	output.lightViewPosition = mul(float4(input.position, 1.0f), _world);
+	output.lightViewPosition = mul(output.lightViewPosition, _lightView);
+	output.lightViewPosition = mul(output.lightViewPosition, _lightProjection);
+
+	float4 pos = mul(float4(input.position, 1.0f), _world);
+	output.yFogFactor = saturate((_yFogEnd - pos.y) / (_yFogEnd - _yFogStart));
+
+	pos = mul(pos, _view);
+	output.zFogFactor = saturate((_zFogEnd - pos.z) / (_zFogEnd - _zFogStart));
+
+	output.fogColor = _fogColor;
+	
 	return output;
 }
 
-Texture2D _map[5] : register(t0);
-SamplerState _samp;
+Texture2D _depthMap : register(t0);
+Texture2D _map[5] : register(t1);
+
+SamplerState _sampWrap : register(s0);
+SamplerState _sampClamp : register(s1);
 
 float4 PS(PixelInput input) : SV_TARGET
 {
-	float3x3 TBN = float3x3(normalize(input.tangent), normalize(input.binormal), normalize(input.normal));
+	float4 color = _ambientColor;
+	float3 lightDir = -_direction;
 
+	// 기본 텍스쳐를 기울기에 따라 선택 //////////////////////
 	float4 textureColor;
-	float4 grassColor = saturate(_map[0].Sample(_samp, input.uv.zw));
-	float4 slopeColor = saturate(_map[1].Sample(_samp, input.uv.zw));
-	float4 rockColor = saturate(_map[2].Sample(_samp, input.uv.zw));
-
+	float4 grassColor = saturate(_map[0].Sample(_sampWrap, input.uv.zw));
+	float4 slopeColor = saturate(_map[1].Sample(_sampWrap, input.uv.zw));
+	float4 rockColor = saturate(_map[2].Sample(_sampWrap, input.uv.zw));
 	float slope = 1.0f - input.normal.y;
-	float depthValue = input.depthPosition.z / input.depthPosition.w;
-	float3 bumpNormal;
-
-	// 기본 텍스쳐를 기울기에 따라 선택
-
 	if (slope < 0.2f)
 	{
 		textureColor = lerp(grassColor, slopeColor, slope / 0.2f);
@@ -69,21 +84,76 @@ float4 PS(PixelInput input) : SV_TARGET
 	{
 		textureColor = rockColor;
 	}
+	//////////////////////////////////////////////////////////////////
 
-	// 거리에따라 텍스쳐 하나를 합성
-
-	if (depthValue < 0.995f)
-	{ 
-		float4 bumpMap = _map[4].Sample(_samp, input.uv.xy);
+	// 노멀 계산 /////////////////////////////////////////////////////
+	float3 normal;
+	float farValue = input.depthPosition.z / input.depthPosition.w;
+	if (farValue < 0.995f)
+	{
+		float3x3 TBN = float3x3(normalize(input.tangent), normalize(input.binormal), normalize(input.normal));
+		float4 bumpMap = _map[4].Sample(_sampWrap, input.uv.xy);
 		bumpMap = (bumpMap * 2.0f) - 1.0f;
-		bumpNormal = mul(bumpMap.xyz, TBN);
+		normal = mul(bumpMap.xyz, TBN);
 
-		textureColor = textureColor * _map[3].Sample(_samp, input.uv.xy) * 1.8f;
+		textureColor = textureColor * _map[3].Sample(_sampWrap, input.uv.xy) * 1.8f;
 	}
 	else
 	{
-		bumpNormal = normalize(input.normal);
+		normal = normalize(input.normal);
 	}
+	/////////////////////////////////////////////////////////////////
 
-	return NormalColor(float4(0.1f, 0.1f, 0.1f, 1.0f), textureColor, _direction, bumpNormal);
+	// 안개로 텍스쳐 살짝 변경 ////////////////////////////////////////
+
+	textureColor = input.zFogFactor * textureColor + (1.0f - input.zFogFactor) * input.fogColor;
+	//textureColor = input.yFogFactor * textureColor + (1.0f - input.yFogFactor) * fogColor;
+	
+		
+	/////////////////////////////////////////////////////////////////
+
+	// 그림자 계산 && 음영 계산 ////////////////////////////////////////////////////
+	float bias = 0.0001f;
+	float2 projectTexCoord;
+	projectTexCoord.x = input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
+	projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+	float depthValue, lightDepthValue, lightIntensity;
+
+	//DepthMap에서 보이는 범위 내에 있다면
+	if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
+	{
+		depthValue = _depthMap.Sample(_sampClamp, projectTexCoord).r;
+		lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
+
+		lightDepthValue = lightDepthValue - bias;
+
+		if (lightDepthValue < depthValue)
+		{
+			lightIntensity = saturate(dot(normal, lightDir));
+
+			if (lightIntensity > 0.0f)
+			{
+				color += (_diffuseColor * lightIntensity);
+
+				color = saturate(color);
+			}
+		}
+	}
+	else
+	{
+		lightIntensity = saturate(dot(normal, lightDir));
+
+		if (lightIntensity > 0.0f)
+		{
+			color += (_diffuseColor * lightIntensity);
+
+			color = saturate(color);
+		}
+	}
+	/////////////////////////////////////////////////////////////////
+
+	// 최종 합성
+	color = color * textureColor;
+
+	return color;
 }

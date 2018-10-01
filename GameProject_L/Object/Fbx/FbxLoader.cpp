@@ -49,6 +49,174 @@ void FbxLoader::ConvertAnim(wstring fbxFile)
 	SAFE_DELETE(w);
 }
 
+void FbxLoader::AddAnimation(string fbxAnimFile, Model ** model, string animName)
+{
+	string temp = animName;
+	if (strcmp(temp.c_str(), "") == 0)
+	{
+		String::SplitFilePath(fbxAnimFile, NULL, &temp);
+		String::DeleteExt(&temp, temp);
+	}
+
+	FbxLoader* loader = new FbxLoader();
+	loader->LoadAnim(fbxAnimFile, model, temp);
+	SAFE_DELETE(loader);
+}
+
+void FbxLoader::LoadAnim(string file, Model ** model, string animName)
+{
+	int major, minor, revision;
+	FbxManager::GetFileFormatVersion(major, minor, revision);
+
+	FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
+	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
+	manager->SetIOSettings(ios);
+
+	importer = FbxImporter::Create(manager, "");
+	bool check = importer->Initialize(file.c_str(), -1, ios);
+	assert(check == true);
+
+	check = importer->Import(scene);
+	assert(check == true);
+
+	FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
+	if (sceneSystemUnit != FbxSystemUnit::m) {
+		FbxSystemUnit::m.ConvertScene(scene);
+	}
+
+	converter = new FbxGeometryConverter(manager);
+	{
+		ProcessAnimations(model, animName);
+	}
+	SAFE_DELETE(converter);
+
+	ios->Destroy();
+	importer->Destroy();
+}
+
+void FbxLoader::ProcessAnimations(Model ** model, string animName)
+{
+	if ((*model)->animationController == NULL)
+		(*model)->animationController = new ModelAnimationController();
+
+	FbxNode* rootNode = scene->GetRootNode();
+	if (rootNode == NULL) return;
+
+	string test = rootNode->GetName();
+	float frameRate = (float)FbxTime::GetFrameRate(scene->GetGlobalSettings().GetTimeMode());
+
+	FbxArray<FbxString *> takeArray;
+	FbxDocument* document = dynamic_cast<FbxDocument *>(scene);
+	if (document != NULL)
+		document->FillAnimStackNameArray(takeArray);
+
+	for (int i = 0; i < importer->GetAnimStackCount(); i++)
+	{
+		FbxTakeInfo* takeInfo = importer->GetTakeInfo(i);
+		//wstring takeName = String::StringToWString(takeInfo->mName.Buffer());
+
+		FbxTime start = FbxTime(FbxLongLong(0x7fffffffffffffff));
+		FbxTime stop = FbxTime(FbxLongLong(-0x7fffffffffffffff));
+
+		FbxTimeSpan span = takeInfo->mLocalTimeSpan;
+
+		double startTime = span.GetStart().GetSecondDouble();
+		double endTime = span.GetStop().GetSecondDouble();
+
+		if (startTime < endTime)
+		{
+			// KeyFrames의 수 = Animation 실행 시간(초) * 초당 Frmae 수
+			int keyFrames = (int)((endTime - startTime) * (double)frameRate);
+
+			ModelAnimation* animation = new ModelAnimation(String::StringToWString(animName), keyFrames, frameRate);
+			((*model)->animationController)->AddAnimation(animation);
+
+			ProcessAnimation(model, rootNode, String::StringToWString(animName), frameRate, (float)startTime, (float)endTime);
+		}
+	}
+	takeArray.Clear();
+}
+
+void FbxLoader::ProcessAnimation(Model ** model, FbxNode * node, wstring takeName, float frameRate, float start, float stop)
+{
+	FbxNodeAttribute* nodeAttribute = node->GetNodeAttribute();
+	if (nodeAttribute != NULL)
+	{
+		if (nodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		{
+			if ((*model)->skeleton != NULL)
+			{
+				wstring temp = String::StringToWString(node->GetName());
+				ModelSkeletonBone* bone = (*model)->skeleton->FindBone(temp);
+
+				if (bone != NULL)
+				{
+					ModelAnimationKeyFrames* animationKeyFrames = new ModelAnimationKeyFrames(takeName);
+
+					double time = 0;
+					while (time <= (double)stop)
+					{
+						FbxTime takeTime;
+						takeTime.SetSecondDouble(time);
+
+						/*	D3DXMATRIX matAbsoluteTransform = GetAbsoluteTransformFromCurrentTake(node, takeTime);
+						D3DXMATRIX matParentAbsoluteTransform = GetAbsoluteTransformFromCurrentTake(node->GetParent(), takeTime);
+
+						D3DXMATRIX matInvParentAbsoluteTransform;
+						D3DXMatrixInverse(&matInvParentAbsoluteTransform, NULL, &matParentAbsoluteTransform);
+
+						D3DXMATRIX matTransform = matAbsoluteTransform * matInvParentAbsoluteTransform;
+						animationKeyFrames->AddKeyFrame(matTransform);*/
+
+						D3DXMATRIX localTransform = GetLocalTransformFromCurrentTake(node, takeTime);
+						animationKeyFrames->AddKeyFrame(localTransform);
+
+						time += 1.0f / frameRate;
+					}
+
+					bone->AddAnimationKeyFrames(animationKeyFrames);
+				}//if(bone)
+			}//if(skeleton)
+		}
+		else if (nodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh)
+		{
+			ModelPart* part = NULL;
+			for each(ModelPart* temp in (*model)->parts)
+			{
+				string nodeName = node->GetName();
+				if (nodeName == temp->GetName())
+				{
+					part = temp;
+
+					break;
+				}
+			}
+
+			if (part != NULL)
+			{
+				ModelAnimationKeyFrames* animationKeyFrames = new ModelAnimationKeyFrames(takeName);
+
+				double time = 0;
+				while (time <= (double)stop)
+				{
+					FbxTime takeTime;
+					takeTime.SetSecondDouble(time);
+
+					D3DXMATRIX matAbsoluteTransform = GetAbsoluteTransformFromCurrentTake(node, takeTime);
+					animationKeyFrames->AddKeyFrame(matAbsoluteTransform);
+
+					time += 1.0f / frameRate;
+				}
+
+				//mesh->AddAnimationKeyFrames(animationKeyFrames);
+			}
+		}//if(nodeAttribute->GetAttributeType())
+	}//if(nodeAttribute)
+
+	for (int i = 0; i < node->GetChildCount(); ++i)
+		ProcessAnimation(model, node->GetChild(i), takeName, frameRate, start, stop);
+}
+
 IMeshData * FbxLoader::Load(wstring modelName, GlobalValues * values)
 {
 	Model* model = new Model;
@@ -57,7 +225,7 @@ IMeshData * FbxLoader::Load(wstring modelName, GlobalValues * values)
 	return model;
 }
 
-bool FbxLoader::LoadAnim(wstring animName, Model* model)
+bool FbxLoader::LoadAnim(wstring animName, Model* model, bool rootMotion, bool repeatMotion)
 {
 	if (model->skeleton == nullptr)
 		return false;
@@ -68,31 +236,40 @@ bool FbxLoader::LoadAnim(wstring animName, Model* model)
 	BinaryReader* r = new BinaryReader;
 	r->Open(Contents + L"UserBinaryAnim/" + animName + L".ani");
 
-	wstring animNameG = r->Wstring();
-	int keyFrameG = r->Int();
-	float rateG = r->Float();
-	float defaultRateG = r->Float();
-
-	ModelAnimation* anim = new ModelAnimation(animNameG, keyFrameG, rateG, defaultRateG);
-	model->animationController->AddAnimation(anim);
-
-	int count = r->Int();
-	for (int i = 0; i < count; i++)
+	int animNumber = r->Int();
+	for (int i = 0; i < animNumber; i++)
 	{
-		wstring boneName = r->Wstring();
-		ModelAnimationKeyFrames* akf = new ModelAnimationKeyFrames();
-		akf->Load(r);
+		wstring animNameG = r->Wstring();
+		int keyFrameG = r->Int();
+		float rateG = r->Float();
+		float defaultRateG = r->Float();
 
-		ModelSkeletonBone* bone = model->skeleton->FindBone(boneName);
-		
-		if (bone == nullptr)
+		ModelAnimation* anim = new ModelAnimation(animNameG, keyFrameG, rateG, defaultRateG);
+		if (rootMotion == true)
+			anim->OnRootMotion();
+		if (repeatMotion == false)
+			anim->OnNotRepeatMotion();
+	
+		model->animationController->AddAnimation(anim);
+
+		int count = r->Int();
+		for (int i = 0; i < count; i++)
 		{
-			r->Close();
-			SAFE_DELETE(r);
-			return false;
-		}
+			wstring boneName = r->Wstring();
+			ModelAnimationKeyFrames* akf = new ModelAnimationKeyFrames();
+			akf->Load(r);
 
-		bone->AddAnimationKeyFrames(akf);
+			ModelSkeletonBone* bone = model->skeleton->FindBone(boneName);
+
+			if (bone == nullptr)
+			{
+				r->Close();
+				SAFE_DELETE(r);
+				return false;
+			}
+
+			bone->AddAnimationKeyFrames(akf);
+		}
 	}
 
 	r->Close();
@@ -178,10 +355,10 @@ void FbxLoader::LoadAnim(BinaryWriter* w, string file, string animName)
 	check = importer->Import(scene);
 	assert(check == true);
 
-	FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
-	if (sceneSystemUnit != FbxSystemUnit::m) {
-		FbxSystemUnit::m.ConvertScene(scene);
-	}
+	//FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
+	//if (sceneSystemUnit != FbxSystemUnit::m) {
+	//	FbxSystemUnit::m.ConvertScene(scene);
+	//}
 
 	converter = new FbxGeometryConverter(manager);
 	{
@@ -421,11 +598,13 @@ void FbxLoader::ProcessAnimations(BinaryWriter* w, string animName)
 	if (document != NULL)
 		document->FillAnimStackNameArray(takeArray);
 
-	for (int i = 0; i < importer->GetAnimStackCount(); i++)
+	int animNumber = importer->GetAnimStackCount();
+	w->Int(animNumber);
+
+	for (int i = 0; i < animNumber; i++)
 	{
 		FbxTakeInfo* takeInfo = importer->GetTakeInfo(i);
-		//wstring takeName = String::StringToWString(takeInfo->mName.Buffer());
-
+	
 		FbxTime start = FbxTime(FbxLongLong(0x7fffffffffffffff));
 		FbxTime stop = FbxTime(FbxLongLong(-0x7fffffffffffffff));
 
@@ -464,16 +643,17 @@ void FbxLoader::ProcessAnimation(BinaryWriter* w, FbxNode * node, wstring takeNa
 				FbxTime takeTime;
 				takeTime.SetSecondDouble(time);
 				
-				D3DXMATRIX matAbsoluteTransform = GetAbsoluteTransformFromCurrentTake(node, takeTime);
-				D3DXMATRIX matParentAbsoluteTransform = GetAbsoluteTransformFromCurrentTake(node->GetParent(), takeTime);
+				//D3DXMATRIX matAbsoluteTransform = GetAbsoluteTransformFromCurrentTake(node, takeTime);
+				//D3DXMATRIX matParentAbsoluteTransform = GetAbsoluteTransformFromCurrentTake(node->GetParent(), takeTime);
 
-				D3DXMATRIX matInvParentAbsoluteTransform;
-				D3DXMatrixInverse(&matInvParentAbsoluteTransform, NULL, &matParentAbsoluteTransform);
+				//D3DXMATRIX matInvParentAbsoluteTransform;
+				//D3DXMatrixInverse(&matInvParentAbsoluteTransform, NULL, &matParentAbsoluteTransform);
 
-				D3DXMATRIX matTransform = matAbsoluteTransform * matInvParentAbsoluteTransform;
-				animationKeyFrames->AddKeyFrame(matTransform);
+				//D3DXMATRIX matTransform = matAbsoluteTransform * matInvParentAbsoluteTransform;
+				//animationKeyFrames->AddKeyFrame(matTransform);
 
 				D3DXMATRIX localTransform = GetLocalTransformFromCurrentTake(node, takeTime);
+				
 				animationKeyFrames->AddKeyFrame(localTransform);
 
 				time += (double)(1.0f / frameRate);

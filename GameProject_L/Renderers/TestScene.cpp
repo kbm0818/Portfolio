@@ -14,17 +14,17 @@ TestScene::TestScene( GlobalValues* values )
 	object = values->GameObjectFactory->Create("SkyDome", values);
 	gameObjects.push_back(object);
 
-	object = values->GameObjectFactory->Create("SkyPlane", values);
-	gameObjects.push_back(object);
+	//object = values->GameObjectFactory->Create("SkyPlane", values);
+	//gameObjects.push_back(object);
 
-	object = values->GameObjectFactory->Create("Terrain", values);
-	gameObjects.push_back(object);
+	//object = values->GameObjectFactory->Create("Terrain", values);
+	//gameObjects.push_back(object);
 
-	//FbxLoader::Convert(Contents + L"FbxModels/parasite_l_starkie.fbx");
-	//FbxLoader::ConvertAnim(Contents + L"FbxAnimation/JombieWalking.fbx");
+	////FbxLoader::Convert(Contents + L"FbxModels/parasite_l_starkie.fbx");
+	////FbxLoader::ConvertAnim(Contents + L"FbxAnimation/JombieWalking.fbx");
 
-	object = values->GameObjectFactory->CreateModel(L"parasite_l_starkie", values);
-	gameObjects.push_back(object);
+	//object = values->GameObjectFactory->CreateModel(L"parasite_l_starkie", values);
+	//gameObjects.push_back(object);
 
 	
 }

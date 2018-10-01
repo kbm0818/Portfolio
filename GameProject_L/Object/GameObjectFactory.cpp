@@ -48,7 +48,8 @@ GameObject * GameObjectFactory::Create(string objectName, GlobalValues* values)
 		if (temp != nullptr)
 		{
 			temp->SetShader(values->ShaderFactory->Create(Shaders + L"GameTerrain_Bump.hlsl", ShaderType::VP), ShaderType::VP);
-			
+			temp->SetDepthShader(values->ShaderFactory->Create(Shaders + L"DepthShader.hlsl", ShaderType::VP), ShaderType::VP);
+
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"grass.dds"));
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"detail.dds"));
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"slope.dds"));
@@ -70,6 +71,8 @@ GameObject * GameObjectFactory::Create(string objectName, GlobalValues* values)
 		if (temp != nullptr)
 		{
 			temp->SetShader(values->ShaderFactory->Create(Shaders + L"POMTestRender.hlsl", ShaderType::VP), ShaderType::VP);
+			temp->SetDepthShader(values->ShaderFactory->Create(Shaders + L"DepthShader.hlsl", ShaderType::VP), ShaderType::VP);
+
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"toy_box_disp.png"));
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"toy_box_normal.png"));
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"Box.png"));
@@ -89,8 +92,10 @@ GameObject * GameObjectFactory::Create(string objectName, GlobalValues* values)
 		if (temp != nullptr)
 		{
 			temp->SetShader(values->ShaderFactory->Create(Shaders + L"Sky.hlsl", ShaderType::VP), ShaderType::VP);
-			temp->AddColor(D3DXCOLOR(0.0f, 0.05f, 0.6f, 1.0f));
-			temp->AddColor(D3DXCOLOR(0.0f, 0.5f, 0.8f, 1.0f));
+			temp->SetDepthShader(values->ShaderFactory->Create(Shaders + L"DepthShader.hlsl", ShaderType::VP), ShaderType::VP);
+
+			temp->AddColor(D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f));
+			temp->AddColor(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f));
 		}
 		ob->SetComponent(materialC);
 	}
@@ -107,6 +112,8 @@ GameObject * GameObjectFactory::Create(string objectName, GlobalValues* values)
 		if (temp != nullptr)
 		{
 			temp->SetShader(values->ShaderFactory->Create(Shaders + L"SkyPlaneWithPerlin.hlsl", ShaderType::VP), ShaderType::VP);
+			temp->SetDepthShader(values->ShaderFactory->Create(Shaders + L"DepthShader.hlsl", ShaderType::VP), ShaderType::VP);
+
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"cloud001.dds"));
 			temp->AddSRV(values->SRVFactory->Create(Textures + L"perlin.bmp"));
 			temp->SetSamplerType(SamplerType::MIRROR);
@@ -118,20 +125,26 @@ GameObject * GameObjectFactory::Create(string objectName, GlobalValues* values)
 	return ob;
 }
 
-GameObject * GameObjectFactory::CreateModel(wstring modelName, GlobalValues * values)
+GameObject * GameObjectFactory::CreateModel(wstring modelName, GlobalValues * values, bool isUser)
 {
 	GameObject* ob = new GameObject;
 
 	IMeshData* mesh = FbxLoader::Load(modelName, values);
-	Model* model = dynamic_cast<Model*>(mesh);
-	bool check = FbxLoader::LoadAnim(L"SambaDancing", model);
-	assert(check);
-
-	model->PlayAnimation(0);
 	ob->SetMesh(mesh);
 
+	Model* model = dynamic_cast<Model*>(mesh);
+
 	ob->SetComponent(componentFactory->Create(TransformComponentType::Transform_PhysiscComponent, ob));
-	ob->SetComponent(componentFactory->Create(InputControllerType::UserControllerComponent, ob));
+	
+	if (isUser)
+	{
+		ob->SetComponent(componentFactory->Create(InputControllerType::UserControllerComponent, ob));
+		values->Player = ob;
+	}
+	else
+	{
+		//ob->SetComponent(componentFactory->Create(InputControllerType::MonsterAIComponent, ob));
+	}
 
 	return ob;
 }

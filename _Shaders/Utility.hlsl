@@ -95,3 +95,40 @@ float2 parallaxOcclusionMapping(
 
 	return _uv + finalTexOffset;
 }
+
+float4 GetShadowSpecularColor(float4 _ambientColor, float4 _diffuseColor, float _bias,
+	float4 _lightViewPosition, float3 _normal, float3 _viewDirection, float3 _lightDirection,
+	Texture2D _map, SamplerState _samp, float4 _specularColor, float _specularPower)
+{
+	float2 projectTexCoord;
+	float depthValue;
+	float lightDepthValue;
+	float lightIntensity;
+	float4 color = _ambientColor;
+
+	projectTexCoord.x = _lightViewPosition.x / _lightViewPosition.w / 2.0f + 0.5f;
+	projectTexCoord.y = -_lightViewPosition.y / _lightViewPosition.w / 2.0f + 0.5f;
+
+	if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
+	{
+		depthValue = _map.Sample(_samp, projectTexCoord).r;
+		lightDepthValue = _lightViewPosition.z / _lightViewPosition.w;
+		lightDepthValue = lightDepthValue - _bias;
+
+		if (lightDepthValue < depthValue)
+		{
+			lightIntensity = saturate(dot(_normal, _viewDirection));
+
+			if (lightIntensity > 0.0f)
+			{
+				float3 reflection = normalize(2 * lightIntensity * _normal - _lightDirection);
+				float4 specularIntensity = pow(saturate(dot(reflection, _viewDirection)), _specularPower);
+
+				color += (_diffuseColor * lightIntensity) + (specularIntensity * _specularColor);
+				color = saturate(color);
+			}
+		}
+	}
+
+	return color;
+}

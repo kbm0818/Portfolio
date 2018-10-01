@@ -1,0 +1,100 @@
+#include "Constants.hlsl"
+
+Texture2D _map;
+SamplerState _samp;
+
+cbuffer VS_BlurBuffer : register(b5)
+{
+	float _screenheight;
+	float _screenwidth;
+	float2 blurPadding;
+};
+
+struct VertexInput
+{
+	float3 position : POSITION0;
+	float2 uv : TEXCOORD0;
+};
+
+struct PixelInput
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+	float2 texCoord1 : TEXCOORD1;
+	float2 texCoord2 : TEXCOORD2;
+	float2 texCoord3 : TEXCOORD3;
+	float2 texCoord4 : TEXCOORD4;
+	float2 texCoord5 : TEXCOORD5;
+	float2 texCoord6 : TEXCOORD6;
+	float2 texCoord7 : TEXCOORD7;
+	float2 texCoord8 : TEXCOORD8;
+	float2 texCoord9 : TEXCOORD9;
+};
+
+PixelInput VS(VertexInput input)
+{
+	PixelInput output;
+
+	output.position = mul(float4(input.position,1.0f), _world);
+	output.position = mul(output.position, _orthoView);
+	output.position = mul(output.position, _orthoProjection);
+	
+	output.uv = input.uv;
+
+	float texelSize = 1.0f / _screenheight;
+
+	output.texCoord1 = input.uv + float2(0.0f, texelSize * -4.0f);
+	output.texCoord2 = input.uv + float2(0.0f, texelSize * -3.0f);
+	output.texCoord3 = input.uv + float2(0.0f, texelSize * -2.0f);
+	output.texCoord4 = input.uv + float2(0.0f, texelSize * -1.0f);
+	output.texCoord5 = input.uv + float2(0.0f, texelSize *  0.0f);
+	output.texCoord6 = input.uv + float2(0.0f, texelSize *  1.0f);
+	output.texCoord7 = input.uv + float2(0.0f, texelSize *  2.0f);
+	output.texCoord8 = input.uv + float2(0.0f, texelSize *  3.0f);
+	output.texCoord9 = input.uv + float2(0.0f, texelSize *  4.0f);
+
+	return output;
+}
+
+float4 PS(PixelInput input) : SV_TARGET
+{
+	float weight0, weight1, weight2, weight3, weight4;
+	float normalization;
+	float4 color;
+
+	// Create the weights that each neighbor pixel will contribute to the blur.
+	weight0 = 1.0f;
+	weight1 = 0.9f;
+	weight2 = 0.55f;
+	weight3 = 0.18f;
+	weight4 = 0.1f;
+
+	// Create a normalized value to average the weights out a bit.
+	normalization = (weight0 + 2.0f * (weight1 + weight2 + weight3 + weight4));
+
+	// Normalize the weights.
+	weight0 = weight0 / normalization;
+	weight1 = weight1 / normalization;
+	weight2 = weight2 / normalization;
+	weight3 = weight3 / normalization;
+	weight4 = weight4 / normalization;
+
+	// Initialize the color to black.
+	color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	// Add the nine vertical pixels to the color by the specific weight of each.
+	color += _map.Sample(_samp, input.texCoord1) * weight4;
+	color += _map.Sample(_samp, input.texCoord2) * weight3;
+	color += _map.Sample(_samp, input.texCoord3) * weight2;
+	color += _map.Sample(_samp, input.texCoord4) * weight1;
+	color += _map.Sample(_samp, input.texCoord5) * weight0;
+	color += _map.Sample(_samp, input.texCoord6) * weight1;
+	color += _map.Sample(_samp, input.texCoord7) * weight2;
+	color += _map.Sample(_samp, input.texCoord8) * weight3;
+	color += _map.Sample(_samp, input.texCoord9) * weight4;
+
+	// Set the alpha channel to one.
+	color.a = 1.0f;
+
+	return color;
+}

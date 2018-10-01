@@ -3,24 +3,34 @@
 enum class ComponentFamilyID;
 class IComponent;
 class IMeshData;
-class GameObject : public IGameObject
+
+class GameObject
 {
 public:
 	GameObject();
-	virtual ~GameObject();
+	~GameObject();
 
-	virtual void Update(GlobalValues* exValue);
-	virtual void PreRender(GlobalValues* exValue);
-	virtual void Render(GlobalValues* exValue);
-	virtual void PostRender(GlobalValues* exValue);
-	virtual void ResizeScreen(GlobalValues* exValue);
+	void Update(GlobalValues* values);
+	void PreRender(GlobalValues* values);
+	void Render(GlobalValues* values);
+	void PostRender(GlobalValues* values);
+	void ResizeScreen(GlobalValues* values);
+	void DepthRender(GlobalValues* values);
 
-	IComponent* GetComponent(ComponentFamilyID id);
+	template <typename T>
+	T* GetMesh();
+
+	template <typename T2>
+	T2* GetComponent(ComponentFamilyID id);
+
 	void DeleteComponent(ComponentFamilyID id);
 
 	void SetComponent(ComponentFamilyID id, IComponent* component);
 	void SetComponent(pair<ComponentFamilyID, IComponent*> componentPair);
+
 	void SetMesh(IMeshData* mesh);
+
+
 
 private:
 	friend class GameObjectFactory;
@@ -30,3 +40,16 @@ private:
 
 	IMeshData* mesh;
 };
+
+template<typename T>
+inline T * GameObject::GetComponent(ComponentFamilyID id)
+{
+	iter = components.find(id);
+	return (iter == components.end() ? nullptr : dynamic_cast<T*>(iter->second));
+}
+
+template<typename T>
+inline T * GameObject::GetMesh()
+{
+	return dynamic_cast<T*>(mesh);
+}

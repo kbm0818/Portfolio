@@ -10,6 +10,7 @@
 #include "MaterialComponent.h"
 
 #include "UserControllerC.h"
+#include "BHTMonsterAIC.h"
 
 #include "CBC_SkyPlane.h"
 
@@ -36,7 +37,7 @@ pair<ComponentFamilyID, IComponent*> ComponentFactory::Create(TransformComponent
 			break;
 
 		case TransformComponentType::Transform_PhysiscComponent:
-			return make_pair(ComponentFamilyID::TransformComponent, new Transform_PhysiscC(object));
+			return make_pair(ComponentFamilyID::TransformComponent, new Transform_PhysiscC);
 			break;
 		case TransformComponentType::Transfrom_FollowCamera:
 			return make_pair(ComponentFamilyID::TransformComponent, new Transform_FollowCamera);
@@ -79,6 +80,11 @@ pair<ComponentFamilyID, IComponent*> ComponentFactory::Create(InputControllerTyp
 	case InputControllerType::UserControllerComponent:
 		return make_pair(ComponentFamilyID::InputComponent, new UserControllerC(object));
 		break;
+
+	case InputControllerType::MonsterAIComponent:
+		return make_pair(ComponentFamilyID::InputComponent, new BHTMonsterAIC(object));
+		break;
+
 	default:
 		return make_pair(ComponentFamilyID::InputComponent, nullptr);
 		break;

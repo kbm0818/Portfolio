@@ -44,7 +44,7 @@ void GameObject::Render(GlobalValues * exValue)
 	}
 
 	if(mesh)
-		mesh->Draw(exValue);
+		mesh->Render(exValue);
 }
 
 void GameObject::PostRender(GlobalValues * exValue)
@@ -60,10 +60,16 @@ void GameObject::ResizeScreen(GlobalValues * exValue)
 {
 }
 
-IComponent * GameObject::GetComponent(ComponentFamilyID id)
+void GameObject::DepthRender(GlobalValues * values)
 {
-	iter = components.find(id);
-	return (iter == components.end() ? nullptr : iter->second);
+	for (iter = components.begin(); iter != components.end(); ++iter)
+	{
+		if (iter->second)
+			iter->second->DepthRender(values);
+	}
+
+	if (mesh)
+		mesh->DepthRender(values);
 }
 
 void GameObject::DeleteComponent(ComponentFamilyID id)

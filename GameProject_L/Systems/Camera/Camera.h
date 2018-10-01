@@ -68,8 +68,8 @@ protected:
 private:
 	D3DXVECTOR3 position;
 	D3DXVECTOR2 rotation;
-
-	D3DXMATRIX matRotation;
+	
 	D3DXMATRIX matView;
 	D3DXMATRIX reflectionView;
+	D3DXMATRIX matRotation;
 };

@@ -16,6 +16,7 @@ enum class InputControllerType
 {
 	NONE = 0,
 	UserControllerComponent,
+	MonsterAIComponent,
 }; 
 enum class CustumBufferType
 {

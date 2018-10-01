@@ -10,12 +10,18 @@ public:
 	static void Convert(wstring fbxFile, wstring saveFile = L"");
 	static void ConvertAnim(wstring fbxFile);
 
+	static void AddAnimation(string fbxAnimFile, Model** model, string animName);
+
 	static IMeshData* Load(wstring modelName, GlobalValues* values);
-	static bool LoadAnim(wstring animName, Model* model);
+	static bool LoadAnim(wstring animName, Model* model, bool rootMotion = false, bool repeatMotion = true);
 
 private:
 	FbxLoader();
 	~FbxLoader();
+
+	void LoadAnim(string file, Model** model, string animName);
+	void ProcessAnimations(Model** model, string animName);
+	void ProcessAnimation(Model** model, FbxNode * node, wstring takeName, float frameRate, float start, float stop);
 
 	FbxModelData* Load(string file);
 	FbxModelData* Load(wstring file);

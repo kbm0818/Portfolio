@@ -65,7 +65,6 @@ void Program::Init()
 	values->Perspective = new Perspective(desc.Width, desc.Height);
 	values->Viewport = new Viewport(desc.Width, desc.Height);
 	values->MainCamera = new FirstPerson();
-
 	values->MainCamera->SetPosition(-1, -1, -1);
 	values->MainCamera->SetRotationDegree(D3DXVECTOR2(-50, 50));
 
@@ -117,7 +116,7 @@ void Program::ResizeScreen()
 {
 	D3DDesc desc;
 	D3D::GetDesc(&desc);
-	
+
 	values->Perspective->Set(desc.Width, desc.Height);
 	values->Viewport->Set(desc.Width, desc.Height);
 
