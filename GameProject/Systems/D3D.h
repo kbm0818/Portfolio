@@ -39,9 +39,14 @@ public:
 		d3dDesc = desc;
 	}
 
+	static IDXGISwapChain* GetSwapChain()
+	{
+		return swapChain;
+	}
+
 	void SetRenderTarget(ID3D11RenderTargetView* rtv = NULL, ID3D11DepthStencilView* dsv = NULL);
 
-	void Clear(D3DXCOLOR color = D3DXCOLOR(0xFF555566), ID3D11RenderTargetView* rtv = NULL, ID3D11DepthStencilView* dsv = NULL);
+	void Clear(ID3D11RenderTargetView* rtv = NULL, D3DXCOLOR color = D3DXCOLOR(0xFF555566), ID3D11DepthStencilView* dsv = NULL);
 	void Present();
 
 	void ResizeScreen(float width, float height);

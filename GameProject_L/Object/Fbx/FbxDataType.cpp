@@ -487,7 +487,7 @@ void FbxSkeletonData::AddSkeletonBone(FbxSkeletonBoneData * skeletonBone)
 
 FbxSkeletonBoneData * FbxSkeletonData::FindBone(wstring boneName)
 {
-	for(Pair temp : skeletonBones)
+	for (Pair temp : skeletonBones)
 	{
 		if (boneName == temp.first)
 			return temp.second;
@@ -851,71 +851,3 @@ void FbxPartData::Write(BinaryWriter * w)
 		meshes[i]->Write(w);
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-FbxModelData::FbxModelData(string file)
-	: file(file), animationController(nullptr)
-{
-	D3DXMatrixIdentity(&geometricOffset);
-}
-FbxModelData::FbxModelData()
-	: file(""), animationController(nullptr)
-{
-	D3DXMatrixIdentity(&geometricOffset);
-}
-
-FbxModelData::~FbxModelData()
-{
-	for (FbxMaterialData* material : materials)
-		SAFE_DELETE(material);
-}
-
-void FbxModelData::PushMaterial(FbxMaterialData * material)
-{
-	materials.push_back(material);
-}
-
-D3DXMATRIX FbxModelData::GetAbsoluteTransformFromCurrentTake(FbxNode * node, FbxTime time)
-{
-	return D3DXMATRIX();
-}
-
-void FbxModelData::Write(string file)
-{
-	Write(String::StringToWString(file));
-}
-
-void FbxModelData::Write(wstring file)
-{
-	BinaryWriter* w = new BinaryWriter();
-	wstring temp = Contents + L"UserBinaryFbx/" + file + L"/" + file;
-	// Contents/UserBinaryFbx/모델이름/모델이름.확장자
-
-	w->Open(temp + L".mat");
-	w->UInt(materials.size());
-	for (FbxMaterialData* material : materials)
-		material->Write(w);
-	w->Close();
-
-	w->Open(temp + L".msh");
-	w->UInt(parts.size());
-	for (FbxPartData* part : parts)
-		part->Write(w);
-	w->Close();
-
-	w->Open(temp + L".skl");
-	skeleton->Write(w);
-	w->Close();
-
-	SAFE_DELETE(w);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-

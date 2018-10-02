@@ -12,9 +12,6 @@ Time::Time(void) :
 {
 	QueryPerformanceFrequency((LARGE_INTEGER *)&ticksPerSecond);
 	fpsUpdateInterval = ticksPerSecond >> 1;
-
-	/*TwBar* bar = TweakBar::Get()->GetBar();
-	TwAddVarRO(bar, "Time", TW_TYPE_FLOAT, &framePerSecond, "");*/
 }
 
 Time::~Time(void)
@@ -25,7 +22,7 @@ Time::~Time(void)
 Time* Time::Get()
 {
 	assert(instance != NULL);
-	
+
 	return instance;
 }
 
@@ -47,6 +44,11 @@ void Time::Update()
 
 	//1. 현재시간을 가져와 시간 간격 및 진행 시간을 계산한다.
 	QueryPerformanceCounter((LARGE_INTEGER *)&currentTime);
+
+	//DWORD_PTR dOldMask = SetThreadAffinityMask(GetCurrentThread(), 0);
+	//assert(QueryPerformanceCounter((LARGE_INTEGER *)&currentTime));
+	//SetThreadAffinityMask(GetCurrentThread(), dOldMask);
+
 	timeElapsed = (float)(currentTime - lastTime) / (float)ticksPerSecond;
 	runningTime += timeElapsed;
 

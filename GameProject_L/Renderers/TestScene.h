@@ -17,5 +17,5 @@ public:
 	void ResizeScreen();
 
 private:
-	vector<IGameObject* > gameObjects;
+	vector<GameObject* > gameObjects;
 };

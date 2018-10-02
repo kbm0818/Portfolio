@@ -22,8 +22,10 @@ public:
 	void Color3f(const D3DXCOLOR& data);
 	void Color4f(const D3DXCOLOR& data);
 	void Matrix(const D3DXMATRIX& data);
+	void QUATERNION(D3DXQUATERNION& data);
 
 	void String(const string& data);
+	void WString(wstring& data);
 	void Byte(void* data, UINT dataSize);
 
 protected:
@@ -55,8 +57,10 @@ public:
 	D3DXCOLOR Color3f();
 	D3DXCOLOR Color4f();
 	D3DXMATRIX Matrix();
+	D3DXQUATERNION QUATERNION();
 
 	string String();
+	wstring Wstring();
 	void Byte(void** data, UINT dataSize);
 
 protected:

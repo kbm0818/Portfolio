@@ -38,7 +38,7 @@ void D3D::SetRenderTarget(ID3D11RenderTargetView * rtv, ID3D11DepthStencilView *
 	D3D::GetDC()->OMSetRenderTargets(1, &rtv, dsv);
 }
 
-void D3D::Clear(D3DXCOLOR color, ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv)
+void D3D::Clear(ID3D11RenderTargetView* rtv, D3DXCOLOR color, ID3D11DepthStencilView* dsv)
 {
 	if (rtv == NULL)
 		rtv = renderTargetView;

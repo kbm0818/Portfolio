@@ -11,7 +11,6 @@ WPARAM Window::Run()
 	D3DDesc desc;
 	D3D::GetDesc(&desc);
 
-
 	D3D::Create();
 	Keyboard::Create();
 	Mouse::Create();
@@ -21,8 +20,6 @@ WPARAM Window::Run()
 
 	ImGui::Create(desc.Handle, D3D::GetDevice(), D3D::GetDC());
 	ImGui::StyleColorsDark();
-
-	AssetManager::Create();
 
 	program = new Program();
 	while (true)
@@ -47,12 +44,13 @@ WPARAM Window::Run()
 
 			program->Update();
 			ImGui::Update();
-			program->LateUpdate();
 
 			program->PreRender();
+
+			D3D::Get()->SetRenderTarget();
 			D3D::Get()->Clear();
 			{
-				ImGuiWindowFlags flag = 0;
+			/*	ImGuiWindowFlags flag = 0;
 				flag |= ImGuiWindowFlags_NoTitleBar;
 				flag |= ImGuiWindowFlags_NoMove;
 				flag |= ImGuiWindowFlags_NoResize;
@@ -63,7 +61,7 @@ WPARAM Window::Run()
 
 				ImGui::Begin("Fps Window", NULL, flag);
 				ImGui::Text("Fps %d", (int)ImGui::GetIO().Framerate);
-				ImGui::End();
+				ImGui::End();*/
 
 
 				program->Render();
@@ -75,7 +73,6 @@ WPARAM Window::Run()
 	}
 	SAFE_DELETE(program);
 
-	AssetManager::Delete();
 	ImGui::Delete();
 	Time::Delete();
 	Mouse::Delete();

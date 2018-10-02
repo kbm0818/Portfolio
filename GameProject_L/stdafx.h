@@ -82,4 +82,3 @@ const wstring Textures = L"../_Contents/Textures/";
 
 #include "./Object/Components/IComponent.h"
 #include "./Object/Mesh/IMeshData.h"
-#include "./Object/IGameObject.h"

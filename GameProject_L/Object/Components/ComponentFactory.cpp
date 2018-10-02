@@ -37,7 +37,7 @@ pair<ComponentFamilyID, IComponent*> ComponentFactory::Create(TransformComponent
 			break;
 
 		case TransformComponentType::Transform_PhysiscComponent:
-			return make_pair(ComponentFamilyID::TransformComponent, new Transform_PhysiscC);
+			return make_pair(ComponentFamilyID::TransformComponent, new Transform_PhysiscC(object));
 			break;
 		case TransformComponentType::Transfrom_FollowCamera:
 			return make_pair(ComponentFamilyID::TransformComponent, new Transform_FollowCamera);

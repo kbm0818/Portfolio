@@ -58,7 +58,7 @@ void String::SplitFilePath(string fullPath, string * filePath, string * fileName
 		*fileName = fullPath.substr(index + 1, fullPath.length());
 }
 
-void String::SplitFilePath(wstring fullPath, wstring* filePath/*=NULL*/, wstring* fileName/*=NULL*/)
+void String::SplitFilePath(wstring fullPath, wstring* filePath, wstring* fileName)
 {
 	size_t index = fullPath.find_last_of('/');
 
@@ -212,4 +212,30 @@ const char * String::ToCSharp(string value)
 	strcpy_s(str, size, value.c_str());
 
 	return (const char *)str;
+}
+
+//////////////////////////////////////////////////////////////////////////
+///@brief wstring형의 문자열의 . 다음 3자리를 자른다 ( 확장자 제거에 쓰임)
+///@param value : 변환할 문자열 ( ./ 으로 시작하여야된다)
+///@return 변환 완료 문자열
+//////////////////////////////////////////////////////////////////////////
+void String::DeleteExt(wstring * result, wstring origin)
+{
+	// .인 지점을 찾아내어 확장자도 잘라낸다
+	wstring::size_type stTmp = origin.find(L".", 1);
+	*result = origin;
+	(*result).erase(stTmp, 4);
+}
+
+//////////////////////////////////////////////////////////////////////////
+///@brief wstring형의 문자열의 . 다음 3자리를 자른다 ( 확장자 제거에 쓰임)
+///@param value : 변환할 문자열 ( ./ 으로 시작하여야된다)
+///@return 변환 완료 문자열
+//////////////////////////////////////////////////////////////////////////
+void String::DeleteExt(string * result, string origin)
+{
+	// .인 지점을 찾아내어 확장자도 잘라낸다
+	string::size_type stTmp = origin.find(".", 1);
+	*result = origin;
+	(*result).erase(stTmp, 4);
 }

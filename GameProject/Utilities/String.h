@@ -25,4 +25,7 @@ public:
 	static string WStringToString(wstring value);
 
 	static const char* ToCSharp(string value);
+
+	static void DeleteExt(wstring* result, wstring origin);
+	static void DeleteExt(string* result, string origin);
 };

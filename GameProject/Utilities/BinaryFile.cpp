@@ -16,6 +16,11 @@ BinaryWriter::~BinaryWriter()
 
 void BinaryWriter::Open(wstring filePath, UINT openOption)
 {
+	wstring foldPath;
+	String::SplitFilePath(filePath, &foldPath);
+
+	_wmkdir(foldPath.c_str());
+
 	assert(filePath.length() > 0);
 	fileHandle = CreateFile
 	(
@@ -27,7 +32,6 @@ void BinaryWriter::Open(wstring filePath, UINT openOption)
 		, FILE_ATTRIBUTE_NORMAL
 		, NULL
 	);
-
 
 	bool isChecked = fileHandle != INVALID_HANDLE_VALUE;
 	assert(isChecked);
@@ -102,12 +106,25 @@ void BinaryWriter::Matrix(const D3DXMATRIX& data)
 	WriteFile(fileHandle, &data, sizeof(D3DXMATRIX), &size, NULL);
 }
 
+void BinaryWriter::QUATERNION(D3DXQUATERNION & data)
+{
+	WriteFile(fileHandle, &data, sizeof(D3DXQUATERNION), &size, NULL);
+}
+
 void BinaryWriter::String(const string & data)
 {
 	UInt(data.size());
 
 	const char* str = data.c_str();
 	WriteFile(fileHandle, str, data.size(), &size, NULL);
+}
+
+void BinaryWriter::WString(wstring & data)
+{
+	UInt(data.size());
+
+	const WCHAR* str = data.c_str();
+	WriteFile(fileHandle, str, data.size() * 2, &size, NULL);
 }
 
 void BinaryWriter::Byte(void * data, UINT dataSize)
@@ -141,8 +158,6 @@ void BinaryReader::Open(wstring filePath)
 		, FILE_ATTRIBUTE_NORMAL
 		, NULL
 	);
-
-
 	bool isChecked = fileHandle != INVALID_HANDLE_VALUE;
 	assert(isChecked);
 }
@@ -261,6 +276,16 @@ D3DXMATRIX BinaryReader::Matrix()
 	return matrix;
 }
 
+D3DXQUATERNION BinaryReader::QUATERNION()
+{
+	float x = Float();
+	float y = Float();
+	float z = Float();
+	float w = Float();
+
+	return D3DXQUATERNION(x, y, z, w);
+}
+
 string BinaryReader::String()
 {
 	UINT size = Int();
@@ -271,6 +296,18 @@ string BinaryReader::String()
 
 	return temp;
 }
+
+wstring BinaryReader::Wstring()
+{
+	UINT size = Int();
+
+	WCHAR* temp = new WCHAR[size + 1];
+	ReadFile(fileHandle, temp, sizeof(WCHAR) * size, &this->size, NULL); //데이터 읽기
+	temp[size] = '\0';
+
+	return temp;
+}
+
 
 void BinaryReader::Byte(void ** data, UINT dataSize)
 {

@@ -2,18 +2,25 @@
 
 #include <Windows.h>
 #include <assert.h>
-
+#include <cmath>
+#include <random>
+#include <algorithm>
+#include <numeric>
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
 #include <functional>
+#include <typeinfo>
 using namespace std;
 
 #include <atlbase.h>
 #include <atlconv.h>
 
 #include <dxgi.h>
+#include <dxgi1_2.h>
 #include <d3dcommon.h>
 #include <d3dcompiler.h>
 #include <d3d11shader.h>
@@ -42,32 +49,37 @@ using namespace fbxsdk;
 #define SAFE_DELETE(p){ if(p){ delete (p); (p) = NULL; } }
 #define SAFE_DELETE_ARRAY(p){ if(p){ delete [] (p); (p) = NULL; } }
 
-const wstring Contents = L"..\\_Contents\\";
-const wstring Shaders = L"..\\_Shaders\\";
+const wstring Contents = L"../_Contents/";
+const wstring Shaders = L"../_Shaders/";
+const wstring Textures = L"../_Contents/Textures/";
 
 #include "./Systems/D3D.h"
 #include "./Systems/Keyboard.h"
 #include "./Systems/Mouse.h"
 #include "./Systems/Time.h"
 
-#include "./GameCore/GameObject/GameObject.h"
-#include "./GameCore/GameObject/Components/Transform.h"
-#include "./GameCore/Resource/AssetManager.h"
-#include "./GameCore/Scene/SceneManager.h"
-#include "./GameCore/Scene/World.h"
+#include "./Renderers/GUISettings.h"
+#include "./Renderers/Renderers.h"
 
-#include "./Renders/VertexLayouts.h"
-#include "./Renders/States.h"
-#include "./Renders/Shader.h"
-#include "./Renders/ShaderBuffer.h"
-#include "./Renders/GlobalBuffers.h"
+#include "./Object/Shader/ShaderBuffer.h"
+#include "./Object/Shader/Shader.h"
 
-#include "./Viewer/Camera.h"
-#include "./GameCore/GameObject/Components/Renderer/Renderer.h"
+#include "./Systems/Renders/VertexLayouts.h"
+#include "./Systems/Renders/States.h"
+#include "./Systems/Renders/BackBuffer.h"
+#include "./Systems/Renders/GlobalBuffers.h"
+#include "./Systems/Renders/RenderOptions.h"
+#include "./Systems/Renders/RenderTarget.h"
+#include "./Systems/Camera/Camera.h"
 
+#include "./Utilities/Warehouse.h"
 #include "./Utilities/BinaryFile.h"
 #include "./Utilities/String.h"
-#include "./Utilities/QuaternionUtility.h"
-#include "./Utilities/Math.h"
+#include "./Utilities/Texture.h"
+#include "./Utilities/ImageMaker.h"
+#include "./Utilities/PerlinNoise.h"
+#include "./Utilities/Perlin.h"
 
-#define WORLD SceneManager::Get()->GetCurrentWorld()
+#include "./Object/Components/IComponent.h"
+#include "./Object/Mesh/IMeshData.h"
+#include "./Object/IGameObject.h"

@@ -120,7 +120,6 @@
     <ClInclude Include="Object\Fbx\FbxLoader.h" />
     <ClInclude Include="Object\GameObject.h" />
     <ClInclude Include="Object\GameObjectFactory.h" />
-    <ClInclude Include="Object\IGameObject.h" />
     <ClInclude Include="Object\Mesh\IMeshData.h" />
     <ClInclude Include="Object\Mesh\MeshData.h" />
     <ClInclude Include="Object\Mesh\MeshFactory.h" />

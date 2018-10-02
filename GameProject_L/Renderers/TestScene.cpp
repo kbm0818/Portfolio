@@ -10,12 +10,12 @@ TestScene::TestScene( GlobalValues* values )
 	: Renderers( values )
 {
 	//게임 오브젝트 생성
-	IGameObject* object;
-	object = values->GameObjectFactory->Create("SkyDome", values);
-	gameObjects.push_back(object);
+	GameObject* object;
+	/*object = values->GameObjectFactory->Create("SkyDome", values);
+	gameObjects.push_back(object);*/
 
-	//object = values->GameObjectFactory->Create("SkyPlane", values);
-	//gameObjects.push_back(object);
+	object = values->GameObjectFactory->Create("SkyPlane", values);
+	gameObjects.push_back(object);
 
 	//object = values->GameObjectFactory->Create("Terrain", values);
 	//gameObjects.push_back(object);
@@ -31,7 +31,7 @@ TestScene::TestScene( GlobalValues* values )
 
 TestScene::~TestScene()
 {
-	for (IGameObject* r : gameObjects)
+	for (GameObject* r : gameObjects)
 		SAFE_DELETE(r);
 
 	gameObjects.clear();
@@ -39,30 +39,30 @@ TestScene::~TestScene()
 
 void TestScene::Update()
 {
-	for (IGameObject* r : gameObjects)
+	for (GameObject* r : gameObjects)
 		r->Update(values);
 }
 
 void TestScene::PreRender()
 {
-	for (IGameObject* r : gameObjects)
+	for (GameObject* r : gameObjects)
 		r->PreRender(values);
 }
 
 void TestScene::Render()
 {
-	for (IGameObject* r : gameObjects)
+	for (GameObject* r : gameObjects)
 		r->Render(values);
 }
 
 void TestScene::PostRender()
 {
-	for (IGameObject* r : gameObjects)
+	for (GameObject* r : gameObjects)
 		r->PostRender(values);
 }
 
 void TestScene::ResizeScreen()
 {
-	for (IGameObject* r : gameObjects)
+	for (GameObject* r : gameObjects)
 		r->ResizeScreen(values);
 }
